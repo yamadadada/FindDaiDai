@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单</title>
+</head>
+<body bgcolor="#F8F8F8">
+
+<div th:replace="common/common"></div>
+
+<script type="text/javascript">
+    function toReceipt() {
+        $("#my_receipt_tab").addClass("weui-bar__item_on");
+        $("#my_place_tab").removeClass("weui-bar__item_on");
+        $("#my_place").hide();
+        $("#my_receipt").show();
+    }
+    function toPlace() {
+        $("#my_place_tab").addClass("weui-bar__item_on");
+        $("#my_receipt_tab").removeClass("weui-bar__item_on");
+        $("#my_receipt").hide();
+        $("#my_place").show();
+    }
+</script>
+
+<div class="weui-tab">
+
+    <div class="weui-navbar">
+        <div id="my_receipt_tab" onclick="toReceipt()" class="weui-navbar__item weui-bar__item_on">
+            我的接单
+        </div>
+        <div id="my_place_tab" onclick="toPlace()" class="weui-navbar__item">
+            我的下单
+        </div>
+    </div>
+
+    <div class="weui-tab__panel">
+        <div id="my_receipt" class="weui-panel weui-panel_access">
+            <div th:each="receiptOrderDTO: ${receiptList}" class="weui-form-preview">
+                <div class="weui-form-preview__hd">
+                    <label class="weui-form-preview__label">订单金额</label>
+                    <em th:text="'¥' + ${receiptOrderDTO.getOrderAmount()}" class="weui-form-preview__value">¥</em>
+                </div>
+                <div class="weui-form-preview__bd">
+                    <p>
+                        <label class="weui-form-preview__label">订单描述</label>
+                        <span th:text="${receiptOrderDTO.getOrderName()}" class="weui-form-preview__value"></span>
+                    </p>
+                    <p>
+                        <label class="weui-form-preview__label">地址</label>
+                        <span th:text="${receiptOrderDTO.getAddressDTO().getAddressString()}" class="weui-form-preview__value"></span>
+                    </p>
+                    <p>
+                        <label class="weui-form-preview__label">联系电话</label>
+                        <span th:text="${receiptOrderDTO.getAddressDTO().getAddressPhone()}" class="weui-form-preview__value"></span>
+                    </p>
+                    <p>
+                        <label class="weui-form-preview__label">配送费</label>
+                        <span th:text="${receiptOrderDTO.getFreight()}" class="weui-form-preview__value"></span>
+                    </p>
+                    <p>
+                        <label class="weui-form-preview__label">订单状态</label>
+                        <span th:text="${receiptOrderDTO.getOrderStatusEnum().getMessage()}" class="weui-form-preview__value"></span>
+                    </p>
+                </div>
+                <div class="weui-form-preview__ft">
+                    <a class="weui-form-preview__btn weui-form-preview__btn_primary" th:href="@{'/order/' + ${receiptOrderDTO.getOrderId()} + '?reurl=order'}">详细</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="my_place" class="weui-panel weui-panel_access" style="display: none">
+            <div th:each="placeListDTO: ${placeList}" class="weui-form-preview">
+                <div class="weui-form-preview__hd">
+                    <label class="weui-form-preview__label">订单金额</label>
+                    <em th:text="'¥' + ${placeListDTO.getOrderAmount()}" class="weui-form-preview__value"></em>
+                </div>
+                <div class="weui-form-preview__bd">
+                    <p>
+                        <label class="weui-form-preview__label">订单描述</label>
+                        <span th:text="${placeListDTO.getOrderName()}" class="weui-form-preview__value"></span>
+                    </p>
+                    <p>
+                        <label class="weui-form-preview__label">下单时间</label>
+                        <span th:text="${#dates.format(placeListDTO.getPlaceTime(), 'yyyy-MM-dd HH:mm:ss')}" class="weui-form-preview__value"></span>
+                    </p>
+                    <p>
+                        <label class="weui-form-preview__label">配送费</label>
+                        <span th:text="${placeListDTO.getFreight()}" class="weui-form-preview__value"></span>
+                    </p>
+                    <p>
+                        <label class="weui-form-preview__label">订单状态</label>
+                        <span th:text="${placeListDTO.getOrderStatusEnum().getMessage()}" class="weui-form-preview__value"></span>
+                    </p>
+                </div>
+                <div class="weui-form-preview__ft">
+                    <a th:href="@{'/order/' + ${placeListDTO.getOrderId()} + '?reurl=order'}" class="weui-form-preview__btn weui-form-preview__btn_primary">详细</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="weui-tabbar">
+    <a th:href="@{/index}" class="weui-tabbar__item">
+        <img th:src="@{/images/find-off.png}" src="" alt="" class="weui-tabbar__icon">
+        <p class="weui-tabbar__label">浏览</p>
+    </a>
+    <a class="weui-tabbar__item weui-bar__item_on">
+        <img th:src="@{/images/order-on.png}" src="" alt="" class="weui-tabbar__icon">
+        <p class="weui-tabbar__label">订单</p>
+    </a>
+    <a th:href="@{/me}" class="weui-tabbar__item">
+        <img th:src="@{/images/me-off.png}" src="" alt="" class="weui-tabbar__icon">
+        <p class="weui-tabbar__label">我</p>
+    </a>
+</div>
+
+</body>
+</html>

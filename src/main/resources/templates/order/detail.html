@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单详情</title>
+</head>
+<body bgcolor="#F8F8F8">
+
+<div th:replace="common/common"></div>
+
+<div class="weui-cells__title">订单描述</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <p th:text="${orderDTO.getOrderName()}"></p>
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells__title">收货地址</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <p th:text="${orderDTO.getAddressDTO().getAddressString()}"></p>
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells__title">下单时间</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <p th:text="${#dates.format(orderDTO.getPlaceTime(), 'yyyy-MM-dd HH:mm:ss')}"></p>
+        </div>
+    </div>
+</div>
+
+<div th:if="${orderDTO.getReceiptTime() != null}">
+    <div class="weui-cells__title">接单时间</div>
+    <div class="weui-cells">
+        <div class="weui-cell">
+            <div class="weui-cell__bd">
+                <p th:text="${#dates.format(orderDTO.getReceiptTime(), 'yyyy-MM-dd HH:mm:ss')}"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells__title">订单状态</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <p th:text="${orderDTO.getOrderStatusEnum().getMessage()}"></p>
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells__title">物品清单</div>
+<div th:each="item: ${itemList}" class="weui-form-preview">
+    <div class="weui-form-preview__hd">
+        <label class="weui-form-preview__label">物品</label>
+        <em th:text="${item.getItemName()}" class="weui-form-preview__value"></em>
+    </div>
+    <div class="weui-form-preview__bd">
+        <p>
+            <label class="weui-form-preview__label">单价</label>
+            <span th:text="${item.getPrice()}" class="weui-form-preview__value"></span>
+        </p>
+        <p>
+            <label class="weui-form-preview__label">数量</label>
+            <span th:text="${item.getNumber()}" class="weui-form-preview__value"></span>
+        </p>
+        <p>
+            <label class="weui-form-preview__label">小计</label>
+            <span th:text="${item.getPrice() * item.getNumber()}" class="weui-form-preview__value"></span>
+        </p>
+    </div>
+</div>
+
+<div th:if="${orderDTO.getOrderRemark() != null}">
+    <div class="weui-cells__title">订单备注</div>
+    <div class="weui-cells">
+        <div class="weui-cell">
+            <div class="weui-cell__bd">
+                <p th:text="${orderDTO.getOrderRemark()}"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells__title">物品总金额</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <p th:text="${orderDTO.getItemAmount()}"></p>
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells__title">运费</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <p th:text="${orderDTO.getFreight()}"></p>
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells__title">订单总金额</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <p th:text="${orderDTO.getOrderAmount()}"></p>
+        </div>
+    </div>
+</div>
+
+<div class="weui-form-preview__ft">
+    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 0 and orderDTO.getPlaceUserDTO().getUserId() == userId}"
+       class="weui-form-preview__btn weui-form-preview__btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/pay'}">付款</a>
+    <a th:if="${(orderDTO.getOrderStatusEnum().getCode() == 0 or orderDTO.getOrderStatusEnum().getCode() == 1) and orderDTO.getPlaceUserDTO().getUserId() == userId}"
+       class="weui-form-preview__btn weui-form-preview__btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/cancel'}">取消</a>
+    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 1 and orderDTO.getPlaceUserDTO().getUserId() != userId}"
+       class="weui-form-preview__btn weui-form-preview__btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/receipt'}">接单</a>
+    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 2 and orderDTO.getReceiptUserDTO().getUserId() == userId}"
+       class="weui-form-preview__btn weui-form-preview__btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/complete'}">完成</a>
+</div>
+
+<div class="weui-cells">
+    <a th:href="@{'/' + ${reurl}}" class="weui-btn weui-btn_default">返回</a>
+</div>
+
+</body>
+</html>

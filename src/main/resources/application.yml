@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active: dev
+  devtools:
+    restart:
+      exclude: templates/**,static/**
+  data:
+    elasticsearch:
+      cluster-name: five-cluster
+      repositories:
+        enabled: true
+      cluster-nodes: 127.0.0.1:9300

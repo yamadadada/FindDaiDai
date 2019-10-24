@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+<body bgcolor="#F8F8F8">
+
+<div th:replace="common/common"></div>
+
+<script type="text/javascript">
+    function realSearch() {
+        var p = $("#search_input").val();
+        if (p === '') {
+            return;
+        }
+        $.ajax({
+            url: 'http://127.0.0.1:8080/search',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                p: p
+            },
+            success: function (obj) {
+                var data = obj.data;
+                $("#search_show").empty();
+                var orderId_array = [];
+                $.each(data, function (index, d) {
+                    orderId_array.push('' + d.orderId);
+                });
+                $("div[id$='_orderId']").each(function () {
+                    var orderId = $(this).attr('id').split('_')[0];
+                    if (orderId_array.indexOf('' + orderId) === -1) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                });
+            }
+        })
+    }
+    function cancelSearch() {
+        $("#search_input").val('');
+        $("#search_text").show();
+        $("#search_cancel").hide();
+        $("div[id$='_orderId']").each(function () {
+            $(this).show();
+        });
+    }
+    function toSearch() {
+        $("#search_text").hide();
+        $("#search_cancel").show();
+    }
+    function toOrderDetail(obj) {
+        window.location.href = "http://127.0.0.1:8080/order/" + $(obj).attr('id').split('_')[0] + "?reurl=index";
+    }
+</script>
+
+<div class="weui-tab">
+    <div class="weui-tab__panel">
+
+        <div class="weui-search-bar" id="search_bar">
+            <form class="weui-search-bar__form">
+                <div onclick="toSearch()" class="weui-search-bar__box">
+                    <i class="weui-icon-search"></i>
+                    <input onkeyup="realSearch()" type="search" class="weui-search-bar__input" id="search_input" placeholder="搜索" />
+                    <a href="javascript:cancelSearch()" class="weui-icon-clear" id="search_clear"></a>
+                </div>
+                <label for="search_input" class="weui-search-bar__label" id="search_text">
+                    <i class="weui-icon-search"></i>
+                    <span>搜索</span>
+                </label>
+            </form>
+            <a href="javascript:cancelSearch()" class="weui-search-bar__cancel-btn" id="search_cancel">取消</a>
+        </div>
+
+        <a th:href="@{'/order/toPublish'}" class="weui-btn weui-btn_primary">发布订单</a>
+
+        <div class="weui-panel" id="content">
+            <div class="weui-panel__bd">
+                <div th:each="orderDTO: ${orderDTOList}" class="weui-media-box weui-media-box_text" th:id="${orderDTO.getOrderId()} + '_orderId'" onclick="toOrderDetail(this)">
+                        <h4 th:text="${orderDTO.getOrderName()}" class="weui-media-box__title"></h4>
+                        <p th:text="${orderDTO.getItemDescribe()}" class="weui-media-box__desc"></p>
+                        <p th:text="${orderDTO.getAddressDTO().getAddressString()}" class="weui-media-box__desc"></p>
+                        <ul class="weui-media-box__info">
+                            <li th:text="${orderDTO.getItemAmount()}" class="weui-media-box__info__meta"></li>
+                            <li th:text="${orderDTO.getFreight()}" class="weui-media-box__info__meta"></li>
+                            <li th:text="${orderDTO.getOrderAmount()}" class="weui-media-box__info__meta weui-media-box__info__meta_extra"></li>
+                        </ul>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="weui-tabbar">
+    <a href="" class="weui-tabbar__item weui-bar__item_on">
+        <img th:src="@{/images/find-on.png}" src="" alt="" class="weui-tabbar__icon">
+        <p class="weui-tabbar__label">浏览</p>
+    </a>
+    <a th:href="@{/order}" class="weui-tabbar__item">
+        <img th:src="@{/images/order-off.png}" src="" alt="" class="weui-tabbar__icon">
+        <p class="weui-tabbar__label">订单</p>
+    </a>
+    <a th:href="@{/me}" class="weui-tabbar__item">
+        <img th:src="@{/images/me-off.png}" src="" alt="" class="weui-tabbar__icon">
+        <p class="weui-tabbar__label">我</p>
+    </a>
+</div>
+
+</body>
+</html>

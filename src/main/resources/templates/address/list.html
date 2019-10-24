@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>收货地址</title>
+</head>
+<body bgcolor="#F8F8F8">
+
+<div th:replace="common/common"></div>
+
+<div class="weui-cells__title">收货地址</div>
+<div class="weui-cells">
+    <a th:each="addressDTO: ${addressDTOList}" class="weui-cell weui-cell_access" th:href="@{'/address/' + ${addressDTO.getAddressId()}}">
+        <div class="weui-cell__bd">
+            <p th:text="${addressDTO.getAddressName()} + '   ' + ${addressDTO.getAddressPhone()}"></p>
+            <p th:text="${addressDTO.getAddressString()}"></p>
+            <p th:if="${defaultAddressId != null and addressDTO.getAddressId().equals(defaultAddressId)}">（默认地址）</p>
+        </div>
+        <div class="weui-cell__ft">
+        </div>
+    </a>
+</div>
+
+<div class="weui-cells">
+    <a th:href="@{/address/toAdd}" class="weui-btn weui-btn_primary">新增</a>
+    <a href="javascript:history.go(-1)" class="weui-btn weui-btn_default">返回</a>
+</div>
+
+</body>
+</html>

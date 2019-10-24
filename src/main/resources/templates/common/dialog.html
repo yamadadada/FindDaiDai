@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>dialog</title>
+</head>
+<body>
+
+<script type="text/javascript">
+    function hideDialog() {
+        $("#dialog").hide();
+    }
+    function hideRecheckDialog() {
+        $("dialog_recheck").hide();
+    }
+</script>
+
+<div id="dialog" style="display: none;">
+    <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__hd"><strong class="weui-dialog__title">错误</strong></div>
+            <div id="dialog_info" class="weui-dialog__bd">错误信息</div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:hideDialog()" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            </div>
+        </div>
+</div>
+
+<div id="dialog_recheck" style="display: none;">
+    <div class="weui-mask"></div>
+    <div class="weui-dialog">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">提交订单</strong></div>
+        <div class="weui-dialog__bd">提交订单后不可修改，是否确认？</div>
+        <div class="weui-dialog__ft">
+            <a href="javascript:hideRecheckDialog()" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+            <a href="javascript:publish()" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

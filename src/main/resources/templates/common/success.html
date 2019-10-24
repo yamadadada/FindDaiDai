@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>成功</title>
+</head>
+<body bgcolor="#F8F8F8">
+
+<div th:replace="common/common"></div>
+
+<script type="text/javascript">
+    function toReturn() {
+        var url = $("#url").val();
+        window.location.href = "http://127.0.0.1:8080" + url;
+    }
+</script>
+
+<input id="url" type="hidden" th:value="${url}">
+
+<div class="weui-msg">
+    <div class="weui-msg__icon-area"><i class="weui-icon-success weui-icon_msg"></i></div>
+    <div class="weui-msg__text-area">
+        <h2 class="weui-msg__title">成功</h2>
+        <p class="weui-msg__desc" th:text="${msg}"></p>
+    </div>
+    <div class="weui-msg__opr-area">
+        <p class="weui-btn-area">
+            <a href="javascript:toReturn()" class="weui-btn weui-btn_primary">返回</a>
+        </p>
+    </div>
+    <div class="weui-msg__extra-area">
+        <div class="weui-footer">
+            <p class="weui-footer__links">
+                <a href="javascript:" class="weui-footer__link"></a>
+            </p>
+            <p class="weui-footer__text">Copyright &copy; 2018-2019 weui.io</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
