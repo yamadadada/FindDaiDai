@@ -51,7 +51,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Long insert(Address address) {
-        Integer result = addressMapper.insert(address);
+        int result = addressMapper.insert(address);
         if (result == 0) {
             throw new FiveException(ResultEnums.ADDRESS_INSERT_ERROR, "/address/toAdd");
         }
@@ -73,7 +73,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public void update(Address address) {
-        Integer result = addressMapper.updateById(address);
+        int result = addressMapper.updateById(address);
         if (result != 1) {
             throw new FiveException(ResultEnums.ADDRESS_UPDATE_ERROR);
         }
@@ -81,7 +81,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public void deleteById(Long addressId) {
-        Integer result = addressMapper.deleteById(addressId);
+        int result = addressMapper.deleteById(addressId);
         if (result != 1) {
             throw new FiveException(ResultEnums.ADDRESS_DELETE_ERROR);
         }

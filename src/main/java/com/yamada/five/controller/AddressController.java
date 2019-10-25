@@ -59,6 +59,12 @@ public class AddressController {
         return "address/list";
     }
 
+    /**
+     * 新增收货地址
+     * @param address
+     * @param isDefault
+     * @return
+     */
     @PostMapping("")
     @ResponseBody
     public Object add(@Valid Address address, @RequestParam(value = "isDefault") Boolean isDefault) {
@@ -75,6 +81,35 @@ public class AddressController {
                 throw new FiveException(ResultEnums.USER_UPDATE_ERROR, "/toAdd");
             }
         }
+        return ResultVOUtil.success(null);
+    }
+
+    /**
+     * 修改收货地址
+     * @param addressId
+     * @param form
+     * @param isDefault
+     * @return
+     */
+    @PostMapping("/{addressId}")
+    @ResponseBody
+    public Object update(@PathVariable("addressId") Long addressId, @Valid Address form,
+                         @RequestParam("isDefault") Boolean isDefault) {
+        // 验证身份
+        UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Address address = addressService.getById(addressId);
+        if (!userInfo.getUserId().equals(address.getUserId())) {
+            throw new FiveException(ResultEnums.NOT_AUTHORITY);
+        }
+        address.setAddressDetailId(form.getAddressDetailId());
+        address.setAddressName(form.getAddressName());
+        address.setAddressPhone(form.getAddressPhone());
+        if (isDefault) {
+            User user = userService.getById(userInfo.getUserId());
+            user.setAddressId(addressId);
+            userService.updateById(user);
+        }
+        addressService.update(address);
         return ResultVOUtil.success(null);
     }
 
@@ -102,6 +137,12 @@ public class AddressController {
         return ResultVOUtil.success(map);
     }
 
+    /**
+     * 查看地址详细信息
+     * @param addressId
+     * @param map
+     * @return
+     */
     @GetMapping("/{addressId}")
     public String detail(@PathVariable("addressId") Long addressId, Map<String, Object> map) {
         // 验证身份
@@ -122,29 +163,6 @@ public class AddressController {
         map.put("isDefault", isDefault);
         map.put("areaEnumList", AreaEnum.values());
         return "address/add";
-    }
-
-    @PostMapping("/{addressId}")
-    public String update(@PathVariable("addressId") Long addressId, @Valid Address form,
-                         @RequestParam("isDefault") Boolean isDefault, Map<String, Object> map) {
-        // 验证身份
-        UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Address address = addressService.getById(addressId);
-        if (!userInfo.getUserId().equals(address.getUserId())) {
-            throw new FiveException(ResultEnums.NOT_AUTHORITY);
-        }
-        address.setAddressDetailId(form.getAddressDetailId());
-        address.setAddressName(form.getAddressName());
-        address.setAddressPhone(form.getAddressPhone());
-        if (isDefault) {
-            User user = userService.getById(userInfo.getUserId());
-            user.setAddressId(addressId);
-            userService.updateById(user);
-        }
-        addressService.update(address);
-        map.put("msg", "更新成功！");
-        map.put("url", "/address");
-        return "common/success";
     }
 
     @GetMapping("/delete/{addressId}")

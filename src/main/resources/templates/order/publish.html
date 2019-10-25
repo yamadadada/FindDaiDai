@@ -20,9 +20,6 @@
     function nameDefault() {
         $("#orderName").val("不指定");
     }
-    function addNewAddress() {
-        $("#addAddressDiv").show();
-    }
     function loadAddress() {
         $("#address_div").empty();
         $.ajax({
@@ -202,15 +199,9 @@
     </div>
 </div>
 
-<!--<a href="javascript:addNewAddress()" class="weui-cell weui-cell_link">-->
-<!--    <div class="weui-cell__bd">添加新地址</div>-->
-<!--</a>-->
-
 <a th:href="@{/address}" class="weui-cell weui-cell_link">
     <div class="weui-cell__bd">管理收货地址</div>
 </a>
-
-<div th:replace="address/add"></div>
 
 <div id="item_parent">
     <div id="0_food_item" class="weui-panel weui-panel_access">

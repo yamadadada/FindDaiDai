@@ -57,155 +57,126 @@
             }
         })
     });
+
     function subForm() {
         var select1 = $("#select1 option:selected").val();
         var select2 = $("#select2 option:selected").val();
         var select3 = $("#select3 option:selected").val();
+        var addressId = $("#address_id").val();
         var addressName = $("#addressName").val();
         var addressPhone = $("#addressPhone").val();
         var isDefault = $("#isDefault").is(":checked");
         if (select1 === '' || select2 === '' || select3 === '' || addressName === '' || addressPhone === '') {
             $("#dialog_info").text("你输入的格式不正确！请重新输入！");
             $("#dialog").show();
-        } else {
-            $("#loadingToast").show();
-            $.ajax({
-                url: server_host + '/address',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    addressDetailId: select3,
-                    addressName: addressName,
-                    addressPhone: addressPhone,
-                    isDefault: isDefault
-                },
-                success: function () {
-                    $("#loadingToast").hide();
-                    $("#toast_info").text("已完成");
-                    $("#toast").show();
-                    setTimeout(function () {
-                        $("#toast").hide();
-                    }, 2000);
-                    var flag = $("#flag").val();
-                    if (flag === '0') {
-                        loadAddress();
-                    } else {
-                        window.location.href = "http://127.0.0.1:8080/address"
-                    }
-                },
-                error: function () {
-                    $("#loadingToast").hide();
-                    $("#dialog_info").text("新增地址错误！请稍后再试");
-                    $("#dialog").show();
-                }
-            });
-            $("#addAddressDiv").hide();
+            return;
         }
-    }
-    function update() {
-        var select1 = $("#select1 option:selected").val();
-        var select2 = $("#select2 option:selected").val();
-        var select3 = $("#select3 option:selected").val();
-        var addressName = $("#addressName").val();
-        var addressPhone = $("#addressPhone").val();
-        var isDefault = $("#isDefault").is(":checked");
-        if (!isDefault) {
-            var isDefaultNode = $("#isDefault");
-            isDefaultNode.val("false");
-            isDefaultNode.attr("checked", "checked");
-        }
-        if (select1 === '' || select2 === '' || select3 === '' || addressName === '' || addressPhone === '') {
-            $("#dialog_info").text("你输入的格式不正确！请重新输入！");
-            $("#dialog").show();
-        }
-        $("#sub").click();
+        $("#loadingToast").show();
+        $.ajax({
+            url: server_host + '/address/' + addressId,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                addressDetailId: select3,
+                addressName: addressName,
+                addressPhone: addressPhone,
+                isDefault: isDefault
+            },
+            success: function () {
+                $("#loadingToast").hide();
+                $("#toast_info").text("已完成");
+                $("#toast").show();
+                setTimeout(function () {
+                    $("#toast").hide();
+                }, 2000);
+                history.go(-1);
+            },
+            error: function () {
+                $("#loadingToast").hide();
+                $("#dialog_info").text("发生错误！请稍后再试");
+                $("#dialog").show();
+            }
+        });
     }
 </script>
-<div id="addAddressDiv">
 
-    <input id="flag" type="hidden" th:value="${addressDTO == null ? '0' : '1'}">
+<input id="address_id" type="hidden" th:value="${addressDTO == null ? '' : addressDTO.getAddressId()}">
 
-<form th:action="@{'/address/' + ${addressDTO == null ? '' : addressDTO.getAddressId()}}" method="post">
-    <div class="weui-cells__title">收货地址</div>
-    <div class="weui-cells">
-        <div class="weui-cell weui-cell_select weui-cell_select-after">
-            <div class="weui-cell__hd">
-                <label for="select1" class="weui-label">地区</label>
-            </div>
-            <div class="weui-cell__bd">
-                <select id="select1" class="weui-select">
-                    <option></option>
-                    <option th:if="${addressDTO == null}" th:each="areaEnum: ${areaEnumList}" th:value="${areaEnum.getCode()}"
-                            th:text="${areaEnum.getArea()}"></option>
-                    <option th:if="${addressDTO != null}" th:each="areaEnum: ${areaEnumList}" th:value="${areaEnum.getCode()}"
-                            th:text="${areaEnum.getArea()}"
-                            th:selected="${areaEnum.getCode().equals(addressDTO.getAddressDetailDTO().getAreaEnum().getCode())}"></option>
-                </select>
-            </div>
+<div class="weui-cells__title">收货地址</div>
+<div class="weui-cells">
+    <div class="weui-cell weui-cell_select weui-cell_select-after">
+        <div class="weui-cell__hd">
+            <label for="select1" class="weui-label">地区</label>
         </div>
-        <div class="weui-cell weui-cell_select weui-cell_select-after">
-            <div class="weui-cell__hd">
-                <label for="select2" class="weui-label">楼栋</label>
-            </div>
-            <div class="weui-cell__bd">
-                <select id="select2" class="weui-select">
-                    <option th:if="${buildingList != null}" th:each="building: ${buildingList}"
-                            th:value="${building.getBuilding()}" th:text="${building.getBuilding()}"
-                            th:selected="${building.getBuilding().equals(addressDTO.getAddressDetailDTO().getBuilding())}"></option>
-                </select>
-            </div>
-        </div>
-        <div class="weui-cell weui-cell_select weui-cell_select-after">
-            <div class="weui-cell__hd">
-                <label for="select3" class="weui-label">房间</label>
-            </div>
-            <div class="weui-cell__bd">
-                <select id="select3" class="weui-select" name="address_detail_id">
-                    <option th:if="${roomList != null}" th:each="room: ${roomList}" th:value="${room.getAddressDetailId()}"
-                            th:text="${room.getRoom()}" th:selected="${room.getRoom().equals(addressDTO.getAddressDetailDTO().getRoom())}"></option>
-                </select>
-            </div>
+        <div class="weui-cell__bd">
+            <select id="select1" class="weui-select">
+                <option></option>
+                <option th:if="${addressDTO == null}" th:each="areaEnum: ${areaEnumList}" th:value="${areaEnum.getCode()}"
+                        th:text="${areaEnum.getArea()}"></option>
+                <option th:if="${addressDTO != null}" th:each="areaEnum: ${areaEnumList}" th:value="${areaEnum.getCode()}"
+                        th:text="${areaEnum.getArea()}"
+                        th:selected="${areaEnum.getCode().equals(addressDTO.getAddressDetailDTO().getAreaEnum().getCode())}"></option>
+            </select>
         </div>
     </div>
-
-    <div class="weui-cells weui-cells_form">
-        <div class="weui-cell">
-            <div class="weui-cell__hd">
-                <label class="weui-label">收货人</label>
-            </div>
-            <div class="weui-cell__bd">
-                <input th:value="${addressDTO == null ? '' : addressDTO.getAddressName()}" id="addressName" name="addressName" class="weui-input" type="text" placeholder="请输入收货人"/>
-            </div>
+    <div class="weui-cell weui-cell_select weui-cell_select-after">
+        <div class="weui-cell__hd">
+            <label for="select2" class="weui-label">楼栋</label>
         </div>
-        <div class="weui-cell weui-cells_form">
-            <div class="weui-cell__hd">
-                <label class="weui-label">手机号</label>
-            </div>
-            <div class="weui-cell__bd">
-                <input th:value="${addressDTO == null ? '' : addressDTO.getAddressPhone()}" id="addressPhone" name="addressPhone" class="weui-input" type="tel" placeholder="请输入手机号">
-            </div>
+        <div class="weui-cell__bd">
+            <select id="select2" class="weui-select">
+                <option th:if="${buildingList != null}" th:each="building: ${buildingList}"
+                        th:value="${building.getBuilding()}" th:text="${building.getBuilding()}"
+                        th:selected="${building.getBuilding().equals(addressDTO.getAddressDetailDTO().getBuilding())}"></option>
+            </select>
         </div>
     </div>
-
-    <div class="weui-cells weui-cells_form">
-        <div class="weui-cell weui-cell_switch">
-            <div class="weui-cell__bd">设置为默认地址</div>
-            <div class="weui-cell__ft">
-                <input id="isDefault" name="isDefault" th:checked="${isDefault}" value="true" class="weui-switch" type="checkbox" />
-            </div>
+    <div class="weui-cell weui-cell_select weui-cell_select-after">
+        <div class="weui-cell__hd">
+            <label for="select3" class="weui-label">房间</label>
+        </div>
+        <div class="weui-cell__bd">
+            <select id="select3" class="weui-select" name="address_detail_id">
+                <option th:if="${roomList != null}" th:each="room: ${roomList}" th:value="${room.getAddressDetailId()}"
+                        th:text="${room.getRoom()}" th:selected="${room.getRoom().equals(addressDTO.getAddressDetailDTO().getRoom())}"></option>
+            </select>
         </div>
     </div>
+</div>
 
-    <button id="submit" type="submit" style="display: none"></button>
-</form>
-
-    <div class="weui-cells">
-        <a th:if="${addressDTO == null}" href="javascript:subForm()" class="weui-btn weui-btn_primary">提交</a>
-        <a th:if="${addressDTO != null}" href="javascript:update()" class="weui-btn weui-btn_primary">提交修改</a>
-        <a th:if="${addressDTO != null}" th:href="@{'/address/delete/' + ${addressDTO.getAddressId()}}" class="weui-btn weui-btn_warn">删除该地址</a>
-        <a th:if="${addressDTO != null}" th:href="@{/address}" class="weui-btn weui-btn_default">返回</a>
+<div class="weui-cells weui-cells_form">
+    <div class="weui-cell">
+        <div class="weui-cell__hd">
+            <label class="weui-label">收货人</label>
+        </div>
+        <div class="weui-cell__bd">
+            <input th:value="${addressDTO == null ? '' : addressDTO.getAddressName()}" id="addressName" name="addressName" class="weui-input" type="text" placeholder="请输入收货人"/>
+        </div>
     </div>
+    <div class="weui-cell weui-cells_form">
+        <div class="weui-cell__hd">
+            <label class="weui-label">手机号</label>
+        </div>
+        <div class="weui-cell__bd">
+            <input th:value="${addressDTO == null ? '' : addressDTO.getAddressPhone()}" id="addressPhone" name="addressPhone" class="weui-input" type="tel" placeholder="请输入手机号">
+        </div>
+    </div>
+</div>
 
+<div class="weui-cells weui-cells_form">
+    <div class="weui-cell weui-cell_switch">
+        <div class="weui-cell__bd">设置为默认地址</div>
+        <div class="weui-cell__ft">
+            <input id="isDefault" name="isDefault" th:checked="${isDefault}" value="true" class="weui-switch" type="checkbox" />
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells">
+    <a th:if="${addressDTO == null}" href="javascript:subForm()" class="weui-btn weui-btn_primary">提交</a>
+    <a th:if="${addressDTO != null}" href="javascript:subForm()" class="weui-btn weui-btn_primary">提交修改</a>
+    <a th:if="${addressDTO != null}" th:href="@{'/address/delete/' + ${addressDTO.getAddressId()}}" class="weui-btn weui-btn_warn">删除该地址</a>
+    <a href="javascript:history.go(-1)" class="weui-btn weui-btn_default">返回</a>
 </div>
 
 </body>
