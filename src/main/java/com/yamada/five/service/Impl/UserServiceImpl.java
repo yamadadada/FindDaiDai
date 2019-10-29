@@ -6,14 +6,18 @@ import com.yamada.five.enums.ResultEnums;
 import com.yamada.five.enums.UserStatusEnum;
 import com.yamada.five.exception.FiveException;
 import com.yamada.five.mapper.AddressMapper;
+import com.yamada.five.mapper.OrderMapper;
 import com.yamada.five.mapper.UserMapper;
 import com.yamada.five.pojo.Address;
+import com.yamada.five.pojo.Order;
 import com.yamada.five.pojo.User;
 import com.yamada.five.service.AddressService;
 import com.yamada.five.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -23,6 +27,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private AddressMapper addressMapper;
+
+    @Autowired
+    private OrderMapper orderMapper;
 
     @Autowired
     private AddressService addressService;
@@ -86,5 +93,26 @@ public class UserServiceImpl implements UserService {
             }
         }
         return userDTO;
+    }
+
+    @Override
+    public void judgeReceipt(Long userId) {
+        User user = getById(userId);
+        QueryWrapper<Order> wrapper = new QueryWrapper<>();
+        wrapper.eq("receipt_user_id", userId);
+        List<Order> orderList = orderMapper.selectList(wrapper);
+        if (orderList.size() <= 5) {
+            return;
+        }
+        int sum = 0;
+        for (Order order: orderList) {
+            sum += order.getPlaceRemark();
+        }
+        double avgRemark = sum / orderList.size();
+        if (avgRemark < 50) {
+            // 评价过低，无法接单
+            user.setUserStatus(UserStatusEnum.BANNED.getCode());
+            userMapper.updateById(user);
+        }
     }
 }

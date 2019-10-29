@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <title>成功</title>
 </head>
-<body bgcolor="#F8F8F8">
+<body>
 
 <div th:replace="common/common"></div>
 
 <script type="text/javascript">
     function toReturn() {
         var url = $("#url").val();
-        window.location.href = "http://127.0.0.1:8080" + url;
+        console.log("url=" + url);
+        window.location.href = server_host + "/" + url;
     }
 </script>
 

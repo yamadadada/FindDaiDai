@@ -90,7 +90,8 @@ public class OrderServiceImpl implements OrderService {
         BeanUtils.copyProperties(form, order);
         order.setPlaceTime(new Date());
         order.setPlaceUserId(userId);
-        order.setOrderStatus(OrderStatusEnum.NEW.getCode());
+//        order.setOrderStatus(OrderStatusEnum.NEW.getCode());
+        order.setOrderStatus(OrderStatusEnum.HAVE_PAY.getCode());
         BigDecimal itemAmount = new BigDecimal(0);
         List<Item> itemList = form.getItemList();
         for (Item item: itemList) {
@@ -99,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
         }
         order.setItemAmount(itemAmount);
         order.setOrderAmount(itemAmount.add(order.getFreight()));
-        Integer result = orderMapper.insert(order);
+        int result = orderMapper.insert(order);
         if (result == 0) {
             throw new FiveApiException(ResultEnums.ORDER_OPERATION_ERROR);
         }

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单评价</title>
+</head>
+<body>
+
+<div th:replace="common/common"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var $sliderTrack = $('#sliderTrack'),
+            $sliderHandler = $('#sliderHandler'),
+            $sliderValue = $('#sliderValue');
+        var totalLen = $('#sliderInner').width(),
+            startLeft = 0,
+            startX = 0;
+        $sliderHandler
+            .on('touchstart', function (e) {
+                startLeft = parseInt($sliderHandler.css('left')) * totalLen / 100;
+                startX = e.changedTouches[0].clientX;
+            })
+            .on('touchmove', function(e){
+                var dist = startLeft + e.changedTouches[0].clientX - startX,
+                    percent;
+                dist = dist < 0 ? 0 : dist > totalLen ? totalLen : dist;
+                percent =  parseInt(dist / totalLen * 100);
+                $sliderTrack.css('width', percent + '%');
+                $sliderHandler.css('left', percent + '%');
+                $sliderValue.text(percent);
+                e.preventDefault();
+            });
+    });
+
+    function publish() {
+        var orderId = $('#orderId').val();
+        var evaluation = parseInt($("#sliderValue").text());
+        var type = $('#type').val();
+        $.ajax({
+            url: server_host + '/order/' + orderId + '/evaluation',
+            type: 'GET',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: {
+                evaluation: evaluation,
+                type: type
+            },
+            error: function () {
+                $("#loadingToast").hide();
+                $("#dialog_info").text("评价失败！请稍后再试");
+                $("#dialog").show();
+            },
+            success: function () {
+                $("#loadingToast").hide();
+                $("#toast").show();
+                setTimeout(function () {
+                    $("#toast").hide();
+                    window.location.href = server_host + "/order";
+                }, 2000);
+            }
+        })
+    }
+</script>
+
+<input type="hidden" id="orderId" th:value="${orderId}">
+<input type="hidden" id="type" th:value="${type}">
+
+<div class="weui-form">
+    <div class="weui-form__text-area">
+        <h2 class="weui-form__title">评价</h2>
+    </div>
+    <div class="weui-form__control-area">
+        <div class="page__bd page__bd_spacing">
+            <div class="weui-slider-box">
+                <div class="weui-slider">
+                    <div id="sliderInner" class="weui-slider__inner">
+                        <div id="sliderTrack" style="width: 50%;" class="weui-slider__track"></div>
+                        <div id="sliderHandler" style="left: 50%;" class="weui-slider__handler"></div>
+                    </div>
+                </div>
+                <div id="sliderValue" class="weui-slider-box__value">50</div>
+            </div>
+        </div>
+        <br>
+        <div class="weui-cells weui-cells_form">
+            <div class="weui-cell">
+                <div class="weui-cell__bd">
+                    <textarea id="order_remark" class="weui-textarea" placeholder="请输入评价" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="weui-form__opr-area">
+        <a class="weui-btn weui-btn_primary" href="" id="">提交</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -16,4 +16,6 @@ public interface UserService {
     Integer updateById(User user);
 
     UserDTO userToUserDTO(User user);
+
+    void judgeReceipt(Long userId);
 }

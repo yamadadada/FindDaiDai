@@ -6,6 +6,7 @@ import lombok.Data;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -22,6 +23,9 @@ public class OrderForm {
 
     // 运费
     private BigDecimal freight;
+
+    // 订单截止时间
+    private Date deadline;
 
     // 订单备注
     private String orderRemark;

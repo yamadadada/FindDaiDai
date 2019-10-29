@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>发布订单</title>
 </head>
-<body bgcolor="#F8F8F8">
 
 <div th:replace="common/common"></div>
 <div th:replace="common/dialog"></div>
@@ -13,10 +12,54 @@
 
     var item_count = 1;
 
+    var deadline = new Date(new Date().getTime() + 3 * 60 * 60 * 1000);
+
     $(document).ready(function () {
         $("#addAddressDiv").hide();
         loadAddress();
+        $('#showDatePicker').on('click', function () {
+            weui.datePicker({
+                start: new Date(),
+                end: new Date().getFullYear() + 1,
+                onConfirm: function (result) {
+                    deadline.setFullYear(result[0].value);
+                    deadline.setMonth(result[1].value - 1);
+                    deadline.setDate(result[2].value);
+                    setTimeout(showTimePicker, 500);
+                },
+                title: '选择截止日期'
+            });
+        });
+        $('#deadline').val((deadline.getMonth() + 1) + '-' + deadline.getDate() + ' ' + deadline.getHours() + ':' + deadline.getMinutes());
     });
+
+    function showTimePicker() {
+        var hours = [];
+        var minutes = [];
+        for (var i = 0; i < 24; i++) {
+            var hours_item = {};
+            hours_item.label = ('' + i).length === 1 ? '0' + i : '' + i;
+            hours_item.value = i;
+            hours.push(hours_item);
+        }
+        for (var j = 0; j < 60; j++) {
+            var minites_item = {};
+            minites_item.label = ('' + j).length === 1 ? '0' + j : '' + j;
+            minites_item.value = j;
+            minutes.push(minites_item);
+        }
+        weui.picker(hours, minutes, {
+            defaultValue: [deadline.getHours(), deadline.getMinutes()],
+            onConfirm: function (result) {
+                deadline.setHours(result[0].value);
+                deadline.setMinutes(result[1].value);
+                console.log(deadline.toLocaleString());
+                $('#deadline').val((deadline.getMonth() + 1) + '-' + deadline.getDate() + ' ' + deadline.getHours() + ':' + deadline.getMinutes());
+            },
+            title: '选择截止时间'
+        });
+    }
+
     function nameDefault() {
         $("#orderName").val("不指定");
     }
@@ -71,7 +114,7 @@
         if (isNaN(freight)) {
             freight = 0;
         }
-        $("#amount").text("￥" + (freight + amount).toFixed(2))
+        $("#amount").val("￥" + (freight + amount).toFixed(2))
     }
     function deleteItem(dom) {
         $(dom).parent().parent().remove();
@@ -115,6 +158,11 @@
         if (freight == null || freight.length === 0) {
             freight = "0";
         }
+        if (deadline.getTime() <= new Date().getTime()) {
+            $("#dialog_info").text("截止时间必须晚于下单时间");
+            $("#dialog").show();
+            return;
+        }
         if (order_remark.length > 200) {
             $("#dialog_info").text("备注长度不能超过200");
             $("#dialog").show();
@@ -122,6 +170,7 @@
         }
         var item_list = [];
         // 遍历item
+        var isFinish = false;
         $("input[id$='_item_name']").each(function () {
             var id = $(this).attr('id').split('_')[0];
             var name = $(this).val();
@@ -131,11 +180,15 @@
                 $("#dialog_info").text("物品项输入的格式不正确！请重新输入！");
                 $("#dialog").show();
                 $(this).focus();
+                isFinish = true;
                 return;
             }
             var item = {itemName: name, number: number, price: price};
             item_list.push(item);
         });
+        if (isFinish) {
+            return;
+        }
         $("#loadingToast").show();
         $.ajax({
             url: server_host + '/order',
@@ -147,7 +200,8 @@
                 addressId: addressId,
                 itemList: item_list,
                 freight: freight,
-                orderRemark: order_remark
+                orderRemark: order_remark,
+                deadline: deadline
              }),
             error: function () {
                 $("#loadingToast").hide();
@@ -161,7 +215,7 @@
                 $("#toast").show();
                 setTimeout(function () {
                     $("#toast").hide();
-                    window.location.href = "http://127.0.0.1:8080/order/" + orderId;
+                    window.location.href = server_host + "/order/" + orderId;
                 }, 2000);
             }
         })
@@ -252,7 +306,6 @@
     <div class="weui-cell__bd" onclick="addItem()">添加新物品项</div>
 </a>
 
-<div class="weui-cells__title">总计</div>
 <div class="weui-cells weui-cells_form">
     <div class="weui-cell weui-cells_form">
         <div class="weui-cell__hd">
@@ -264,12 +317,25 @@
     </div>
 </div>
 
+<div class="weui-cells__title">总计</div>
 <div class="weui-cells">
     <div class="weui-cell">
-        <div class="weui-cell__bd">
-            <p>总金额</p>
+        <div class="weui-cell__hd">
+            <label class="weui-label">总金额</label>
         </div>
-        <div id="amount" class="weui-cell__ft"></div>
+        <div class="weui-cell__bd">
+            <input id="amount" class="weui-input" value="" readonly=""/>
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells__title">订单截止时间</div>
+<div class="weui-cell weui-cell">
+    <div class="weui-cell__bd">
+        <input id="deadline" class="weui-input" value="" readonly="">
+    </div>
+    <div class="weui-cell__ft">
+        <a id="showDatePicker" href="javascript:" class="weui-btn weui-btn_default">选择时间</a>
     </div>
 </div>
 
@@ -284,7 +350,7 @@
 
 <div class="weui-cells">
     <a href="javascript:toPublish()" class="weui-btn weui-btn_primary">下单</a>
-    <a th:href="@{/index}" class="weui-btn weui-btn_default">返回</a>
+    <a href="javascript:history.go(-1)" class="weui-btn weui-btn_default">返回</a>
 </div>
 
 </body>

@@ -5,6 +5,7 @@ import com.yamada.five.dto.OrderDTO;
 import com.yamada.five.enums.AreaEnum;
 import com.yamada.five.enums.OrderStatusEnum;
 import com.yamada.five.enums.ResultEnums;
+import com.yamada.five.enums.UserStatusEnum;
 import com.yamada.five.exception.FiveException;
 import com.yamada.five.form.OrderForm;
 import com.yamada.five.pojo.EsItem;
@@ -102,8 +103,8 @@ public class OrderController {
             esItem.setOrderId(orderId);
             esItem.setOrderName(form.getOrderName());
             // 通过rabbitmq通知es更新数据
-            rabbitTemplate.convertAndSend("esitem", esItem);
-            log.info("【消息队列】已发送id为：" + esItem.getItemId() + "的项");
+//            rabbitTemplate.convertAndSend("esitem", esItem);
+//            log.info("【消息队列】已发送id为：" + esItem.getItemId() + "的项");
         }
 
         Map<String, Object> map = new HashMap<>();
@@ -127,6 +128,11 @@ public class OrderController {
         return "redirect:/order/" + orderId;
     }
 
+    /**
+     * 取消订单
+     * @param orderId
+     * @return
+     */
     @GetMapping("/{orderId}/cancel")
     public String cancel(@PathVariable("orderId") Long orderId) {
         UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -145,9 +151,18 @@ public class OrderController {
         return "redirect:/order/" + orderId;
     }
 
+    /**
+     * 接单
+     * @param orderId
+     * @return
+     */
     @GetMapping("/{orderId}/receipt")
     public String receipt(@PathVariable("orderId") Long orderId) {
         UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.getById(userInfo.getUserId());
+        if (user.getUserStatus().equals(UserStatusEnum.BANNED.getCode())) {
+            throw new FiveException(ResultEnums.NOT_PERMISSION);
+        }
         Order order = orderService.getOne(orderId);
         if (userInfo.getUserId().equals(order.getPlaceUserId())) {
             throw new FiveException(ResultEnums.NOT_AUTHORITY);
@@ -155,15 +170,23 @@ public class OrderController {
         if (!order.getOrderStatus().equals(OrderStatusEnum.HAVE_PAY.getCode())) {
             throw new FiveException(ResultEnums.ORDER_OPERATION_ERROR);
         }
+        if (order.getDeadline().getTime() < new Date().getTime()) {
+            throw new FiveException(ResultEnums.ORDER_EXPIRED);
+        }
         order.setReceiptTime(new Date());
         order.setReceiptUserId(userInfo.getUserId());
         order.setOrderStatus(OrderStatusEnum.HAVE_RECEIPT.getCode());
         orderService.updateById(order);
-        return "redirect:/order/" + orderId;
+        return "redirect:/order";
     }
 
+    /**
+     * 完成订单
+     * @param orderId
+     * @return
+     */
     @GetMapping("/{orderId}/complete")
-    public String complete(@PathVariable("orderId") Long orderId) {
+    public String complete(@PathVariable("orderId") Long orderId, Map<String, Object> map) {
         UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Order order = orderService.getOne(orderId);
         if (!userInfo.getUserId().equals(order.getReceiptUserId())) {
@@ -174,6 +197,43 @@ public class OrderController {
         }
         order.setOrderStatus(OrderStatusEnum.COMPLETE.getCode());
         orderService.updateById(order);
-        return "redirect:/order/" + orderId;
+        map.put("orderId", orderId);
+        map.put("type", 1);
+        return "order/evaluation";
+    }
+
+    /**
+     * 评价,
+     * @param orderId
+     * @return
+     */
+    @GetMapping("/{orderId}/evaluation")
+    public String evaluation(@PathVariable("orderId") Long orderId, @RequestParam("evaluation") Integer evaluation,
+                             @RequestParam(value = "evaluation", defaultValue = "0") String type, Map<String, Object> map) {
+        Order order = orderService.getOne(orderId);
+        if (!order.getOrderStatus().equals(OrderStatusEnum.COMPLETE.getCode())) {
+            throw new FiveException(ResultEnums.ORDER_OPERATION_ERROR);
+        }
+//        type == 1代表接单者评价
+        if (type.equals("1")) {
+            UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!userInfo.getUserId().equals(order.getReceiptUserId())) {
+                throw new FiveException(ResultEnums.NOT_AUTHORITY);
+            }
+            order.setReceiptRemark(evaluation);
+            orderService.updateById(order);
+            // 下单者评价后，判断接单者分数
+            userService.judgeReceipt(order.getReceiptUserId());
+        } else {
+            UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!userInfo.getUserId().equals(order.getPlaceUserId())) {
+                throw new FiveException(ResultEnums.NOT_AUTHORITY);
+            }
+            order.setPlaceRemark(evaluation);
+            orderService.updateById(order);
+        }
+        map.put("msg", "评价成功");
+        map.put("url", "order");
+        return "common/success";
     }
 }

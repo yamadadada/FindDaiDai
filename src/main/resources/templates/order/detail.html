@@ -115,19 +115,18 @@
     </div>
 </div>
 
-<div class="weui-form-preview__ft">
-    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 0 and orderDTO.getPlaceUserDTO().getUserId() == userId}"
-       class="weui-form-preview__btn weui-form-preview__btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/pay'}">付款</a>
-    <a th:if="${(orderDTO.getOrderStatusEnum().getCode() == 0 or orderDTO.getOrderStatusEnum().getCode() == 1) and orderDTO.getPlaceUserDTO().getUserId() == userId}"
-       class="weui-form-preview__btn weui-form-preview__btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/cancel'}">取消</a>
-    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 1 and orderDTO.getPlaceUserDTO().getUserId() != userId}"
-       class="weui-form-preview__btn weui-form-preview__btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/receipt'}">接单</a>
-    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 2 and orderDTO.getReceiptUserDTO().getUserId() == userId}"
-       class="weui-form-preview__btn weui-form-preview__btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/complete'}">完成</a>
-</div>
-
 <div class="weui-cells">
-    <a th:href="@{'/' + ${reurl}}" class="weui-btn weui-btn_default">返回</a>
+    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 0 and orderDTO.getPlaceUserDTO().getUserId() == userId}"
+       class="weui-btn weui-btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/pay'}">付款</a>
+    <a th:if="${(orderDTO.getOrderStatusEnum().getCode() == 0 or orderDTO.getOrderStatusEnum().getCode() == 1) and orderDTO.getPlaceUserDTO().getUserId() == userId}"
+       class="weui-btn weui-btn_warn" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/cancel'}">取消</a>
+    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 1 and orderDTO.getPlaceUserDTO().getUserId() != userId}"
+       class="weui-btn weui-btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/receipt'}">接单</a>
+    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 2 and orderDTO.getReceiptUserDTO().getUserId() == userId}"
+       class="weui-btn weui-btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/complete'}">完成</a>
+    <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 3 and orderDTO.getPlaceUserDTO().getUserId() == userId}"
+       class="weui-btn weui-btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/evaluation'}">评价</a>
+    <a href="javascript:history.go(-1)" class="weui-btn weui-btn_default">返回</a>
 </div>
 
 </body>

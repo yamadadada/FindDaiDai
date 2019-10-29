@@ -45,6 +45,15 @@ public class Order {
     // 订单总额
     private BigDecimal orderAmount;
 
+    // 订单截止时间
+    private Date deadline;
+
     // 订单备注
     private String orderRemark;
+
+    // 下单人评价
+    private Integer placeRemark;
+
+    // 接单人评价
+    private Integer receiptRemark;
 }

@@ -23,7 +23,9 @@ public enum ResultEnums {
     PHONE_ERROR(1013, "手机号格式不正确！"),
     MSM_OFTEN(1014, "你的请求太频繁！请稍后再试"),
     FORM_VERIFICATION_ERROR(1015, "你输入的信息有误！"),
-    MSM_VERIFICATION_ERROR(1016, "短信验证码不正确！")
+    MSM_VERIFICATION_ERROR(1016, "短信验证码不正确！"),
+    ORDER_EXPIRED(1017, "订单已过期"),
+    NOT_PERMISSION(1018, "你没有权限接单")
     ;
 
     private Integer code;

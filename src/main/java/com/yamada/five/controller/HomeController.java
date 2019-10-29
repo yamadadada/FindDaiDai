@@ -28,8 +28,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
@@ -57,6 +59,8 @@ public class HomeController {
     @GetMapping("/index")
     public String index(Map<String, Object> map) {
         List<Order> orderList = orderService.getByOrderStatus(OrderStatusEnum.HAVE_PAY);
+        // 筛选出未到期订单
+        orderList = orderList.stream().filter(o -> o.getDeadline().getTime() > new Date().getTime()).collect(Collectors.toList());
         map.put("orderDTOList", orderService.addItemList(orderService.orderListToOrderDTO(orderList)));
         return "index";
     }
