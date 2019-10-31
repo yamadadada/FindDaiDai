@@ -24,9 +24,6 @@ public class MyAuthenticationProvider implements AuthenticationProvider {
     private MyUserDetailsService userDetailsService;
 
     @Autowired
-    private HttpSession session;
-
-    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
@@ -35,8 +32,6 @@ public class MyAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String userName = authentication.getName();
-        session.setAttribute("studentId", userName);
-        session.setAttribute("loginFlag", 0);
         String password = (String) authentication.getCredentials();
         UserInfo userInfo = (UserInfo) userDetailsService.loadUserByUsername(userName);
         if (userInfo == null) {

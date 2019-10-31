@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+</head>
+<body>
+
+<div th:replace="common/common"></div>
+<div th:replace="common/toast"></div>
+<div th:replace="common/dialog"></div>
+
+<div class="page" style="position: absolute;width: 100%;height: 100%;">
+    <div class="weui-form">
+        <div class="weui-form__text-area">
+            <h2 class="weui-form__title">登录</h2>
+        </div>
+        <div class="weui-form__control-area">
+            <div class="weui-cells__group weui-cells__group_form">
+                <div class="weui-cells weui-cells_form">
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label">学号</label></div>
+                        <div class="weui-cell__bd">
+                            <input onchange="verification(this, 'studentId')" class="weui-input" type="number" id="studentId" pattern="[2|3][1|2]1[5|6|7|8]0[0-9]{5}" placeholder="请输入学号"/>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label">密码</label></div>
+                        <div class="weui-cell__bd">
+                            <input onchange="verification(this, 'password')" class="weui-input" type="password" id="password" placeholder="请输入密码"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="weui-cells__tips">
+                    <a href="/me/toUpdatePassword">忘记密码</a>
+                </div>
+            </div>
+        </div>
+        <div class="weui-form__tips-area">
+            <label id="weuiAgree" class="weui-agree">
+                <span class="weui-agree__text">没有帐号？<a href="/toRegistered">立即注册</a>
+                </span>
+            </label>
+        </div>
+        <div class="weui-form__opr-area">
+            <a class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="login">确定</a>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        var $studentId = $('#studentId');
+        var $password = $('#password');
+        $password.on('input', function(){
+            var $value = $password.val();
+            if ($value){
+                $('#login').removeClass('weui-btn_disabled');
+            }else{
+                $('#login').addClass('weui-btn_disabled');
+            }
+        });
+        $('#login').on('click', function(){
+            if ($(this).hasClass('weui-btn_disabled')) return;
+            // 验证表单
+            if (!verification($studentId, 'studentId') || !verification($password, 'password')) {
+                return;
+            }
+            $('.page.cell').removeClass('slideIn');
+            $('#loadingToast').fadeIn(100);
+            $.ajax({
+                url: server_host + '/login/form',
+                type: 'post',
+                dataType: 'json',
+                contentType: 'application/x-www-form-urlencoded',
+                data: {
+                    studentId: $studentId.val(),
+                    password: $password.val()
+                },
+                error: function (res) {
+                    $("#loadingToast").fadeOut(100);
+                    $("#dialog_info").text(res.responseJSON.message);
+                    $("#dialog").fadeIn(100);
+                    $password.val('');
+                },
+                success: function () {
+                    $("#loadingToast").fadeOut(100);
+                    $('#toast_info').text('登录成功');
+                    $("#toast").fadeIn(100);
+                    setTimeout(function () {
+                        $("#toast").fadeOut(100);
+                        window.location.href = server_host + "/index";
+                    }, 1000);
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

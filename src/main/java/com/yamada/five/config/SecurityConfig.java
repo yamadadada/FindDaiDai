@@ -1,5 +1,7 @@
 package com.yamada.five.config;
 
+import com.yamada.five.handler.MyAuthenticationFailureHandler;
+import com.yamada.five.handler.MyAuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,19 +26,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    private MyAuthenticationSuccessHandler successHandler;
+
+    @Autowired
+    private MyAuthenticationFailureHandler failureHandler;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 //        super.configure(http);
         http.formLogin().usernameParameter("studentId").loginPage("/login").loginProcessingUrl("/login/form")
-                .failureUrl("/login-error").permitAll()
+                .successHandler(successHandler)
+                .failureHandler(failureHandler)
                 .and()
                 .authorizeRequests()
                 .antMatchers(// 允许对于网站静态资源的无授权访问
-                        "/index",
-                        "/",
+                        "/toRegistered",
+                        "/signup",
                         "/js/**",
                         "/images/**",
-                        "/signup",
+                        "/login",
                         "/search**",
                         "/sms/**",
                         "/me/toUpdatePassword",

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+</head>
+<body>
+
+<div th:replace="common/common"></div>
+<div th:replace="common/toast"></div>
+<div th:replace="common/dialog"></div>
+
+<div class="page" style="position: absolute;width: 100%;height: 100%;">
+    <div class="weui-form">
+        <div class="weui-form__text-area">
+            <h2 class="weui-form__title">注册</h2>
+        </div>
+        <div class="weui-form__control-area">
+            <div class="weui-cells__group weui-cells__group_form">
+                <div class="weui-cells weui-cells_form">
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label">学号</label></div>
+                        <div class="weui-cell__bd">
+                            <input onchange="verification(this, 'studentId')" class="weui-input" type="number"
+                                   id="studentId" pattern="[2|3][1|2]1[5|6|7|8]0[0-9]{5}" placeholder="请输入学号"/>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label">手机号</label></div>
+                        <div class="weui-cell__bd">
+                            <input onchange="verification(this, 'phone')" class="weui-input" type="tel" id="phone"
+                                   placeholder="请输入手机号"/>
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_vcode">
+                        <div class="weui-cell__hd"><label class="weui-label">验证码</label></div>
+                        <div class="weui-cell__bd">
+                            <input onchange="verification(this, 'checkCode')" class="weui-input" type="number"
+                                   id="checkCode" placeholder="请输入验证码" maxlength="6"/>
+                        </div>
+                        <div class="weui-cell__ft">
+                            <a id="get_code" href="javascript:sendCode()" class="weui-btn weui-btn_default weui-vcode-btn">获取验证码</a>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label">密码</label></div>
+                        <div class="weui-cell__bd">
+                            <input onchange="verification(this, 'password')" class="weui-input" type="password"
+                                   id="password1" placeholder="请输入密码"/>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">
+                            <input onchange="verification(this, 'check_password')" class="weui-input" type="password"
+                                   id="password2" placeholder="请再次输入密码"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="weui-form__tips-area">
+            <label id="weuiAgree" for="weuiAgreeCheckbox" class="weui-agree">
+                <input id="weuiAgreeCheckbox" type="checkbox" class="weui-agree__checkbox"/>
+                <span class="weui-agree__text">阅读并同意<a href="javascript:void(0);">《相关条款》</a>
+                </span>
+            </label>
+        </div>
+        <div class="weui-form__opr-area">
+            <a class="weui-btn weui-btn_primary weui-btn_disabled" href="javascript:" id="registered">注册</a>
+            <a class="weui-btn weui-btn_default" href="javascript:" >返回</a>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        var $studentId = $('#studentId');
+        var $phone = $('#phone');
+        var $checkCode = $('#checkCode');
+        var $password1 = $('#password1');
+        var $password2 = $('#password2');
+        var $agree= $('#weuiAgree');
+        var $agreeCheckbox = $('#weuiAgreeCheckbox');
+        $password2.on('input', function(){
+            var $value = $password2.val();
+            if ($value){
+                $('#registered').removeClass('weui-btn_disabled');
+            }else{
+                $('#registered').addClass('weui-btn_disabled');
+            }
+        });
+        $('#registered').on('click', function(){
+            if ($(this).hasClass('weui-btn_disabled')) return;
+            // 验证表单
+            if (!verification($studentId, 'studentId') || !verification($phone, 'phone') ||
+                !verification($checkCode, 'checkCode') || !verification($password1, 'password') ||
+                !verification($password2, 'check_password')) {
+                return;
+            }
+            if(!$agreeCheckbox.prop("checked")){
+                $agree.addClass('weui-agree_animate');
+                setTimeout(function () {
+                    $agree.removeClass('weui-agree_animate');
+                }, 1000);
+            }
+            $('.page.cell').removeClass('slideIn');
+            $('#loadingToast').fadeIn(100);
+            $.ajax({
+                url: server_host + '/signup',
+                type: 'post',
+                dataType: 'json',
+                contentType: 'application/x-www-form-urlencoded',
+                data: {
+                    studentId: $studentId.val(),
+                    phone: $phone.val(),
+                    checkCode: $checkCode.val(),
+                    password: $password1.val()
+                },
+                error: function (res) {
+                    $("#loadingToast").fadeOut(100);
+                    $("#dialog_info").text(res.responseJSON.message);
+                    $("#dialog").fadeIn(100);
+                    $(":input").val('');
+                },
+                success: function () {
+                    $("#loadingToast").fadeOut(100);
+                    $('#toast_info').text('注册成功');
+                    $("#toast").fadeIn(100);
+                    setTimeout(function () {
+                        $("#toast").fadeOut(100);
+                        window.location.href = server_host + "/login";
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+    // 发送短信验证码
+    function sendCode() {
+        var phoneNode = $("#phone");
+        if (verification(phoneNode, 'phone')) {
+            $.ajax({
+                url: server_host + "/sms/register",
+                type: "GET",
+                dataType: 'json',
+                data: {
+                    tel: phoneNode.val()
+                },
+                success: function () {
+                    $("#toast_info").text("发送成功");
+                    $("#toast").show();
+                    setTimeout(function () {
+                        $("#toast").hide();
+                    }, 2000);
+                    var getCodeNode = $("#get_code");
+                    getCodeNode.text("不可发送");
+                    getCodeNode.attr("href", "#");
+                    setTimeout(function () {
+                        getCodeNode.text("重新发送");
+                        getCodeNode.attr("href", "javascript:sendCode()");
+                    }, 60000);
+                },
+                error: function () {
+                    $("#dialog_info").text("你的请求太频繁！请稍后再试");
+                    $("#dialog").show();
+                }
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

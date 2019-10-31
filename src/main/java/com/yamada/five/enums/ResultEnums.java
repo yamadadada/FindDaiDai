@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ResultEnums {
 
+    OK(200, "成功"),
     USER_EXIST(1000, "该用户已存在！"),
     REGISTER_ERROR(1001, "注册失败！请稍后再试"),
     ADDRESS_INSERT_ERROR(1002, "新增地址失败！请稍后再试"),
@@ -25,7 +26,8 @@ public enum ResultEnums {
     FORM_VERIFICATION_ERROR(1015, "你输入的信息有误！"),
     MSM_VERIFICATION_ERROR(1016, "短信验证码不正确！"),
     ORDER_EXPIRED(1017, "订单已过期"),
-    NOT_PERMISSION(1018, "你没有权限接单")
+    NOT_PERMISSION(1018, "你没有权限接单"),
+    LOGIN_FAIL(1019, "登录失败")
     ;
 
     private Integer code;

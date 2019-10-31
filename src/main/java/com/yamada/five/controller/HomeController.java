@@ -5,6 +5,7 @@ import com.yamada.five.constant.SMSConstant;
 import com.yamada.five.dto.UserDTO;
 import com.yamada.five.enums.OrderStatusEnum;
 import com.yamada.five.enums.ResultEnums;
+import com.yamada.five.exception.FiveApiException;
 import com.yamada.five.exception.FiveException;
 import com.yamada.five.pojo.ImageCode;
 import com.yamada.five.pojo.Order;
@@ -12,6 +13,7 @@ import com.yamada.five.pojo.User;
 import com.yamada.five.service.OrderService;
 import com.yamada.five.service.UserService;
 import com.yamada.five.service.ValidateCodeService;
+import com.yamada.five.utils.ResultVOUtil;
 import com.yamada.five.utils.VerificationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.ServletWebRequest;
 
 import javax.imageio.ImageIO;
@@ -76,12 +79,7 @@ public class HomeController {
 
     @GetMapping("/login")
     public String userLogin() {
-        return "signin";
-    }
-
-    @GetMapping("/login-error")
-    public String loginError() {
-        return "login-error";
+        return "login";
     }
 
     @GetMapping("/imageCode")
@@ -91,37 +89,36 @@ public class HomeController {
         ImageIO.write(imageCode.getImage(), "JPEG", response.getOutputStream());
     }
 
+    @GetMapping("/toRegistered")
+    public String toRegistered() {
+        return "registered";
+    }
+
     /**
-     * 注册
+     * 注册帐号
      * @param studentId
      * @param password
      * @param phone
      * @param checkCode
      * @param session
-     * @param map
      * @return
      */
     @PostMapping("/signup")
-    public String register(@RequestParam("studentId") String studentId, @RequestParam("password") String password, @RequestParam("phone") String phone,
-                           @RequestParam("checkCode") String checkCode, HttpSession session, Map<String, String> map) {
+    @ResponseBody
+    public Object register(@RequestParam("studentId") String studentId, @RequestParam("password") String password, @RequestParam("phone") String phone,
+                           @RequestParam("checkCode") String checkCode, HttpSession session) {
         // 对表单进行校验
         if (!VerificationUtil.isStudentId(studentId) || !VerificationUtil.isPassword(password) || !VerificationUtil.isTel(phone)) {
-            // 返回登录页面时默认切换到注册界面
-            session.setAttribute("loginFlag", "1");
-            throw new FiveException(ResultEnums.FORM_VERIFICATION_ERROR, "/login");
+            throw new FiveApiException(ResultEnums.FORM_VERIFICATION_ERROR);
         }
-
         // 验证手机验证码
         String code = redisTemplate.opsForValue().get(SMSConstant.CODE_PREFIX + phone);
         if (code == null || code.isEmpty() || !code.equals(checkCode)) {
-            session.setAttribute("loginFlag", "1");
-            throw new FiveException(ResultEnums.MSM_VERIFICATION_ERROR, "/login");
+            throw new FiveApiException(ResultEnums.MSM_VERIFICATION_ERROR);
         }
-
         // 验证该用户是否已被注册
         if (userService.studentIdIsRepeat(studentId) != null) {
-            session.setAttribute("loginFlag", "1");
-            throw new FiveException(ResultEnums.USER_EXIST, "/login");
+            throw new FiveApiException(ResultEnums.USER_EXIST);
         }
         User newUser = new User();
         newUser.setStudentId(studentId);
@@ -130,13 +127,10 @@ public class HomeController {
         newUser.setPhone(phone);
         Integer result = userService.insert(newUser);
         if (result == 0) {
-            session.setAttribute("loginFlag", "1");
-            throw new FiveException(ResultEnums.REGISTER_ERROR, "/login");
+            throw new FiveApiException(ResultEnums.REGISTER_ERROR);
         }
         session.setAttribute("studentId", studentId);
-        map.put("msg", "注册成功！");
-        map.put("url", "/login");
-        return "common/success";
+        return ResultVOUtil.success(null);
     }
 
     /**
