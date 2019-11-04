@@ -27,7 +27,9 @@ public enum ResultEnums {
     MSM_VERIFICATION_ERROR(1016, "短信验证码不正确！"),
     ORDER_EXPIRED(1017, "订单已过期"),
     NOT_PERMISSION(1018, "你没有权限接单"),
-    LOGIN_FAIL(1019, "登录失败")
+    LOGIN_FAIL(1019, "登录失败"),
+    ALREADY_VERIFICATION(1020, "已认证，无需再次认证"),
+    NOT_VERIFICATION(1021, "你需要进行身份认证才能进行该操作")
     ;
 
     private Integer code;

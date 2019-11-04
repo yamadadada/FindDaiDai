@@ -26,6 +26,15 @@
     </div>
 </div>
 
+<div class="weui-cells__title">订单截止时间</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <p th:text="${#dates.format(orderDTO.getDeadline(), 'yyyy-MM-dd HH:mm:ss')}"></p>
+        </div>
+    </div>
+</div>
+
 <div class="weui-cells__title">下单时间</div>
 <div class="weui-cells">
     <div class="weui-cell">
@@ -125,7 +134,7 @@
     <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 2 and orderDTO.getReceiptUserDTO().getUserId() == userId}"
        class="weui-btn weui-btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/complete'}">完成</a>
     <a th:if="${orderDTO.getOrderStatusEnum().getCode() == 3 and orderDTO.getPlaceUserDTO().getUserId() == userId}"
-       class="weui-btn weui-btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/evaluation'}">评价</a>
+       class="weui-btn weui-btn_primary" th:href="@{'/order/' + ${orderDTO.getOrderId()} + '/toEvaluation'}">评价</a>
     <a href="javascript:history.go(-1)" class="weui-btn weui-btn_default">返回</a>
 </div>
 

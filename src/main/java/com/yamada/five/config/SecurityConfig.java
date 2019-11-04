@@ -1,5 +1,6 @@
 package com.yamada.five.config;
 
+import com.yamada.five.filter.AuthenticationFilter;
 import com.yamada.five.handler.MyAuthenticationFailureHandler;
 import com.yamada.five.handler.MyAuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
@@ -34,8 +36,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
+//        自定义拦截器用户图形验证码验证
+        AuthenticationFilter myFilter = new AuthenticationFilter("/login/form", failureHandler);
+
 //        super.configure(http);
-        http.formLogin().usernameParameter("studentId").loginPage("/login").loginProcessingUrl("/login/form")
+        http
+                .addFilterBefore(myFilter, UsernamePasswordAuthenticationFilter.class)
+                .formLogin()
+                .usernameParameter("studentId").loginPage("/login").loginProcessingUrl("/login/form")
                 .successHandler(successHandler)
                 .failureHandler(failureHandler)
                 .and()
@@ -49,7 +58,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/search**",
                         "/sms/**",
                         "/me/toUpdatePassword",
-                        "/me/updatePassword"
+                        "/me/updatePassword",
+                        "/imageCode"
                 ).permitAll()
                 .anyRequest().authenticated()
                 .and()

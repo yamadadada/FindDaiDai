@@ -6,6 +6,7 @@
 </head>
 
 <div th:replace="common/common"></div>
+<div th:replace="common/toast"></div>
 <div th:replace="common/dialog"></div>
 
 <script type="text/javascript">
@@ -30,7 +31,9 @@
                 title: '选择截止日期'
             });
         });
-        $('#deadline').val((deadline.getMonth() + 1) + '-' + deadline.getDate() + ' ' + deadline.getHours() + ':' + deadline.getMinutes());
+        var minutes = deadline.getMinutes().toString();
+        var temp_minutes = minutes.length === 1 ? '0' + minutes : minutes;
+        $('#deadline').val((deadline.getMonth() + 1) + '-' + deadline.getDate() + ' ' + deadline.getHours() + ':' + temp_minutes);
     });
 
     function showTimePicker() {
@@ -54,7 +57,9 @@
                 deadline.setHours(result[0].value);
                 deadline.setMinutes(result[1].value);
                 console.log(deadline.toLocaleString());
-                $('#deadline').val((deadline.getMonth() + 1) + '-' + deadline.getDate() + ' ' + deadline.getHours() + ':' + deadline.getMinutes());
+                var minutes = deadline.getMinutes().toString();
+                var temp_minutes = minutes.length === 1 ? '0' + minutes : minutes;
+                $('#deadline').val((deadline.getMonth() + 1) + '-' + deadline.getDate() + ' ' + deadline.getHours() + ':' + temp_minutes);
             },
             title: '选择截止时间'
         });
@@ -189,7 +194,7 @@
         if (isFinish) {
             return;
         }
-        $("#loadingToast").show();
+        $("#loadingToast").fadeIn(100);
         $.ajax({
             url: server_host + '/order',
             type: 'POST',
@@ -203,19 +208,18 @@
                 orderRemark: order_remark,
                 deadline: deadline
              }),
-            error: function () {
-                $("#loadingToast").hide();
-                $("#dialog_info").text("提交订单失败！请稍后再试");
-                $("#dialog").show();
+            error: function (res) {
+                $("#loadingToast").fadeOut(100);
+                $("#dialog_info").text(res.responseJSON.message);
+                $("#dialog").fadeIn(100);
             },
-            success: function (obj) {
-                $("#loadingToast").hide();
-                var data = obj.data;
-                var orderId = data.orderId;
-                $("#toast").show();
+            success: function () {
+                $("#loadingToast").fadeOut(100);
+                $("#toast_info").text("下单成功！");
+                $("#toast").fadeIn(100);
                 setTimeout(function () {
-                    $("#toast").hide();
-                    window.location.href = server_host + "/order/" + orderId;
+                    $("#toast").fadeOut(100);
+                    window.location.href = server_host + "/order";
                 }, 2000);
             }
         })

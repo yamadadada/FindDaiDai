@@ -2,11 +2,58 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>编辑个人信息</title>
 </head>
-<body bgcolor="#F8F8F8">
+<body>
 
 <div th:replace="common/common"></div>
+
+<div class="page" style="position: absolute;width: 100%;height: 100%;">
+    <div class="weui-form">
+        <div class="weui-form__text-area">
+            <h2 class="weui-form__title">编辑个人信息</h2>
+        </div>
+        <div class="weui-form__control-area">
+            <div class="weui-cells__group weui-cells__group_form">
+                <div class="weui-cells weui-cells_form">
+                    <div class="weui-cell weui-cell_readonly">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">学号</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input th:value="${userDTO.getStudentId()}" class="weui-input" placeholder="" value="" readonly="">
+                        </div>
+                    </div>
+                </div>
+                <div class="weui-cells weui-cells_form">
+                    <form th:action="@{'/me/' + ${userDTO.getUserId()}}" method="post">
+                        <div class="weui-cells__title"></div>
+                        <div class="weui-cells weui-cells_form">
+                            <div class="weui-cell">
+                                <div class="weui-cell__hd"><label class="weui-label">姓名</label></div>
+                                <div class="weui-cell__bd">
+                                    <input id="name" th:value="${userDTO.getName()}" name="name" class="weui-input" type="text" placeholder="请输入真实姓名"/>
+                                </div>
+                            </div>
+                            <div class="weui-cell">
+                                <div class="weui-cell__hd"><label class="weui-label">手机号</label></div>
+                                <div class="weui-cell__bd">
+                                    <input id="phone" th:value="${userDTO.getPhone()}" name="phone" class="weui-input" type="tel" pattern="[0-9]{11}" placeholder="请输入手机号"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="submit" type="submit" style="display: none"></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="weui-form__opr-area">
+            <a onclick="sub()" class="weui-btn weui-btn_primary">提交修改</a>
+            <a href="javascript:history.go(-1)" class="weui-btn weui-btn_default">返回</a>
+        </div>
+    </div>
+</div>
 
 <script type="text/javascript">
     function sub() {
@@ -28,38 +75,6 @@
         $("#dialog").hide();
     }
 </script>
-
-<div class="weui-cells__title">学号</div>
-<div class="weui-cells">
-    <div class="weui-cell">
-        <div class="weui-cell__bd">
-            <p th:text="${userDTO.getStudentId()}"></p>
-        </div>
-    </div>
-</div>
-
-<form th:action="@{'/me/' + ${userDTO.getUserId()}}" method="post">
-    <div class="weui-cells__title"></div>
-    <div class="weui-cells weui-cells_form">
-        <div class="weui-cell">
-            <div class="weui-cell__hd"><label class="weui-label">姓名</label></div>
-            <div class="weui-cell__bd">
-                <input id="name" th:value="${userDTO.getName()}" name="name" class="weui-input" type="text" placeholder="请输入真实姓名"/>
-            </div>
-        </div>
-        <div class="weui-cell">
-            <div class="weui-cell__hd"><label class="weui-label">手机号</label></div>
-            <div class="weui-cell__bd">
-                <input id="phone" th:value="${userDTO.getPhone()}" name="phone" class="weui-input" type="tel" pattern="[0-9]{11}" placeholder="请输入手机号"/>
-            </div>
-        </div>
-    </div>
-
-    <button id="submit" type="submit" style="display: none"></button>
-</form>
-
-<a onclick="sub()" class="weui-btn weui-btn_primary">提交修改</a>
-<a th:href="@{/me}" class="weui-btn weui-btn_default">返回</a>
 
 <div id="dialog" style="display: none;">
     <div class="weui-mask"></div>

@@ -6,6 +6,7 @@ import com.yamada.five.enums.AreaEnum;
 import com.yamada.five.enums.OrderStatusEnum;
 import com.yamada.five.enums.ResultEnums;
 import com.yamada.five.enums.UserStatusEnum;
+import com.yamada.five.exception.FiveApiException;
 import com.yamada.five.exception.FiveException;
 import com.yamada.five.form.OrderForm;
 import com.yamada.five.pojo.EsItem;
@@ -97,12 +98,12 @@ public class OrderController {
         for (Item item: itemList) {
             item.setOrderId(orderId);
             itemService.insert(item);
-            EsItem esItem = new EsItem();
-            esItem.setItemId(item.getItemId());
-            esItem.setItemName(item.getItemName());
-            esItem.setOrderId(orderId);
-            esItem.setOrderName(form.getOrderName());
-            // 通过rabbitmq通知es更新数据
+//            EsItem esItem = new EsItem();
+//            esItem.setItemId(item.getItemId());
+//            esItem.setItemName(item.getItemName());
+//            esItem.setOrderId(orderId);
+//            esItem.setOrderName(form.getOrderName());
+//             通过rabbitmq通知es更新数据
 //            rabbitTemplate.convertAndSend("esitem", esItem);
 //            log.info("【消息队列】已发送id为：" + esItem.getItemId() + "的项");
         }
@@ -160,6 +161,9 @@ public class OrderController {
     public String receipt(@PathVariable("orderId") Long orderId) {
         UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.getById(userInfo.getUserId());
+        if (UserStatusEnum.NOT_CERTIFIED.getCode().equals(user.getUserStatus())) {
+            throw new FiveException(ResultEnums.NOT_VERIFICATION);
+        }
         if (user.getUserStatus().equals(UserStatusEnum.BANNED.getCode())) {
             throw new FiveException(ResultEnums.NOT_PERMISSION);
         }
@@ -203,22 +207,36 @@ public class OrderController {
     }
 
     /**
+     * 下单者去评价页面
+     * @param orderId
+     * @param map
+     * @return
+     */
+    @GetMapping("/{orderId}/toEvaluation")
+    public String toEvaluation(@PathVariable("orderId") Long orderId, Map<String, Object> map) {
+        map.put("orderId", orderId);
+        map.put("type", 0);
+        return "order/evaluation";
+    }
+
+    /**
      * 评价,
      * @param orderId
      * @return
      */
     @GetMapping("/{orderId}/evaluation")
-    public String evaluation(@PathVariable("orderId") Long orderId, @RequestParam("evaluation") Integer evaluation,
-                             @RequestParam(value = "evaluation", defaultValue = "0") String type, Map<String, Object> map) {
+    @ResponseBody
+    public Object evaluation(@PathVariable("orderId") Long orderId, @RequestParam("evaluation") Integer evaluation,
+                             @RequestParam(value = "type", defaultValue = "0") String type, Map<String, Object> map) {
         Order order = orderService.getOne(orderId);
         if (!order.getOrderStatus().equals(OrderStatusEnum.COMPLETE.getCode())) {
-            throw new FiveException(ResultEnums.ORDER_OPERATION_ERROR);
+            throw new FiveApiException(ResultEnums.ORDER_OPERATION_ERROR);
         }
 //        type == 1代表接单者评价
         if (type.equals("1")) {
             UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (!userInfo.getUserId().equals(order.getReceiptUserId())) {
-                throw new FiveException(ResultEnums.NOT_AUTHORITY);
+                throw new FiveApiException(ResultEnums.NOT_AUTHORITY);
             }
             order.setReceiptRemark(evaluation);
             orderService.updateById(order);
@@ -227,13 +245,11 @@ public class OrderController {
         } else {
             UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (!userInfo.getUserId().equals(order.getPlaceUserId())) {
-                throw new FiveException(ResultEnums.NOT_AUTHORITY);
+                throw new FiveApiException(ResultEnums.NOT_AUTHORITY);
             }
             order.setPlaceRemark(evaluation);
             orderService.updateById(order);
         }
-        map.put("msg", "评价成功");
-        map.put("url", "order");
-        return "common/success";
+        return ResultVOUtil.success(null);
     }
 }

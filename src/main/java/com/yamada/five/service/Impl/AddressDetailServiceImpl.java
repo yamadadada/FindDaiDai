@@ -22,6 +22,7 @@ public class AddressDetailServiceImpl implements AddressDetailService {
     public List<AddressDetail> getBuildingByArea(Integer area) {
         QueryWrapper<AddressDetail> wrapper = new QueryWrapper<>();
         wrapper.eq("area", area).select("building");
+        wrapper.orderByAsc("building");
         return addressDetailMapper.selectList(wrapper);
     }
 

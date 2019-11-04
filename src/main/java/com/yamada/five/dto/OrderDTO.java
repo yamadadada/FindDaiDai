@@ -47,6 +47,9 @@ public class OrderDTO {
     // 订单备注
     private String orderRemark;
 
+    // 订单截止时间
+    private Date deadline;
+
     //子项目List
     private List<Item> itemList;
 

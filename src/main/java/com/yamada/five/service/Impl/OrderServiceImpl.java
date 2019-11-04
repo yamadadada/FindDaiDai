@@ -5,6 +5,7 @@ import com.yamada.five.bo.UserInfo;
 import com.yamada.five.dto.OrderDTO;
 import com.yamada.five.enums.OrderStatusEnum;
 import com.yamada.five.enums.ResultEnums;
+import com.yamada.five.enums.UserStatusEnum;
 import com.yamada.five.exception.FiveApiException;
 import com.yamada.five.exception.FiveException;
 import com.yamada.five.form.OrderForm;
@@ -64,6 +65,7 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> getReceiptList(Long userId) {
         QueryWrapper<Order> wrapper = new QueryWrapper<>();
         wrapper.eq("receipt_user_id", userId);
+        wrapper.orderByDesc("receipt_time");
         return orderMapper.selectList(wrapper);
     }
 
@@ -71,6 +73,7 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> getPlaceList(Long userId) {
         QueryWrapper<Order> wrapper = new QueryWrapper<>();
         wrapper.eq("place_user_id", userId);
+        wrapper.orderByDesc("place_time");
         return orderMapper.selectList(wrapper);
     }
 
@@ -86,6 +89,12 @@ public class OrderServiceImpl implements OrderService {
         // 登录验证
         UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userInfo.getUserId();
+        // 验证用户状态，状态正常才能发布订单
+        User user = userService.getById(userId);
+        if (!UserStatusEnum.NORMAL.getCode().equals(user.getUserStatus())) {
+            throw new FiveApiException(ResultEnums.NOT_VERIFICATION);
+        }
+
         Order order = new Order();
         BeanUtils.copyProperties(form, order);
         order.setPlaceTime(new Date());
@@ -110,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void updateById(Order order) {
-        Integer result = orderMapper.updateById(order);
+        int result = orderMapper.updateById(order);
         if (result == 0) {
             throw new FiveException(ResultEnums.ORDER_OPERATION_ERROR);
         }

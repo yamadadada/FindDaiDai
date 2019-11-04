@@ -4,9 +4,19 @@
     <meta charset="UTF-8">
     <title>错误</title>
 </head>
-<body bgcolor="#F8F8F8">
+<body>
 
 <div th:replace="common/common"></div>
+
+<script type="text/javascript">
+    // function toReturn() {
+    //     var url = $("#url").val();
+    //     if (typeof(url) == "undefined") {
+    //         url = '';
+    //     }
+    //     window.location.href = server_host + "/" + url;
+    // }
+</script>
 
 <div class="weui-msg">
     <div class="weui-msg__icon-area"><i class="weui-icon-warn weui-icon_msg"></i></div>
@@ -16,7 +26,7 @@
     </div>
     <div class="weui-msg__opr-area">
         <p class="weui-btn-area">
-            <a th:href="@{url}" class="weui-btn weui-btn_primary">返回</a>
+            <a href="javascript:history.go(-1)" class="weui-btn weui-btn_primary">返回</a>
         </p>
     </div>
     <div class="weui-msg__extra-area">

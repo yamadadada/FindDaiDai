@@ -11,7 +11,9 @@
 <script type="text/javascript">
     function toReturn() {
         var url = $("#url").val();
-        console.log("url=" + url);
+        if (typeof(url) == "undefined") {
+            url = '';
+        }
         window.location.href = server_host + "/" + url;
     }
 </script>

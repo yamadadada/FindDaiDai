@@ -6,7 +6,6 @@ import com.yamada.five.dto.UserDTO;
 import com.yamada.five.enums.OrderStatusEnum;
 import com.yamada.five.enums.ResultEnums;
 import com.yamada.five.exception.FiveApiException;
-import com.yamada.five.exception.FiveException;
 import com.yamada.five.pojo.ImageCode;
 import com.yamada.five.pojo.Order;
 import com.yamada.five.pojo.User;
@@ -82,10 +81,17 @@ public class HomeController {
         return "login";
     }
 
+    /**
+     * 获取验证码
+     * @param request
+     * @param response
+     * @throws IOException
+     */
     @GetMapping("/imageCode")
     public void imageCode(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ImageCode imageCode = validateCodeService.createCode(new ServletWebRequest(request));
-        request.getSession().setAttribute("Image_Code", imageCode);
+//        将验证码放入session中
+        request.getSession().setAttribute("imageCode", imageCode.getCode());
         ImageIO.write(imageCode.getImage(), "JPEG", response.getOutputStream());
     }
 
@@ -140,7 +146,7 @@ public class HomeController {
     @GetMapping("/logoutSuccess")
     public String logoutSuccess(Map<String, Object> map) {
         map.put("msg", "注销成功！");
-        map.put("url", "/login");
+        map.put("url", "login");
         return "common/success";
     }
 }

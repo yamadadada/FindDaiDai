@@ -7,6 +7,8 @@
 <body>
 
 <div th:replace="common/common"></div>
+<div th:replace="common/toast"></div>
+<div th:replace="common/dialog"></div>
 
 <script type="text/javascript">
     $(document).ready(function () {
@@ -18,14 +20,14 @@
             startX = 0;
         $sliderHandler
             .on('touchstart', function (e) {
-                startLeft = parseInt($sliderHandler.css('left')) * totalLen / 100;
+                startLeft = parseInt($sliderHandler.css('left'));
                 startX = e.changedTouches[0].clientX;
             })
             .on('touchmove', function(e){
                 var dist = startLeft + e.changedTouches[0].clientX - startX,
                     percent;
                 dist = dist < 0 ? 0 : dist > totalLen ? totalLen : dist;
-                percent =  parseInt(dist / totalLen * 100);
+                percent =  parseInt((dist * 100 / totalLen).toString());
                 $sliderTrack.css('width', percent + '%');
                 $sliderHandler.css('left', percent + '%');
                 $sliderValue.text(percent);
@@ -33,7 +35,7 @@
             });
     });
 
-    function publish() {
+    function submit() {
         var orderId = $('#orderId').val();
         var evaluation = parseInt($("#sliderValue").text());
         var type = $('#type').val();
@@ -43,19 +45,20 @@
             dataType: 'json',
             contentType: 'application/json',
             data: {
+                orderId: orderId,
                 evaluation: evaluation,
                 type: type
             },
             error: function () {
-                $("#loadingToast").hide();
+                $("#loadingToast").fadeOut(100);
                 $("#dialog_info").text("评价失败！请稍后再试");
-                $("#dialog").show();
+                $("#dialog").fadeIn(100);
             },
             success: function () {
-                $("#loadingToast").hide();
-                $("#toast").show();
+                $("#loadingToast").fadeOut(100);
+                $("#toast").fadeIn(100);
                 setTimeout(function () {
-                    $("#toast").hide();
+                    $("#toast").fadeOut(100);
                     window.location.href = server_host + "/order";
                 }, 2000);
             }
@@ -92,7 +95,7 @@
         </div>
     </div>
     <div class="weui-form__opr-area">
-        <a class="weui-btn weui-btn_primary" href="" id="">提交</a>
+        <a class="weui-btn weui-btn_primary" href="javascript:submit()">提交</a>
     </div>
 </div>
 

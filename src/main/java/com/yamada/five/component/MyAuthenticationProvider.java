@@ -1,9 +1,11 @@
 package com.yamada.five.component;
 
 import com.yamada.five.bo.UserInfo;
+import com.yamada.five.constant.ImageCodeConstant;
 import com.yamada.five.pojo.User;
 import com.yamada.five.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +31,9 @@ public class MyAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private HttpSession session;
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String userName = authentication.getName();
@@ -47,8 +52,11 @@ public class MyAuthenticationProvider implements AuthenticationProvider {
         user.setLastLoginTime(new Date());
         userService.updateById(user);
 
+        // 清空图形验证码
+        session.setAttribute("imageCode", "");
+
         Collection<? extends GrantedAuthority> authorities = userInfo.getAuthorities();
-        return new UsernamePasswordAuthenticationToken(userInfo, password, authorities);
+        return new UsernamePasswordAuthenticationToken(userInfo, user, authorities);
     }
 
     @Override

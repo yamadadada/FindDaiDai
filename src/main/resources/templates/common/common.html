@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
     <title>Title</title>
 
-    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.1.3/weui.css">
-    <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.2.1/weui.js"></script>
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.1.3/weui.min.css">
+    <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.2.1/weui.min.js"></script>
 
-    <!--<script src="" th:src="@{/js/jquery-3.4.0.js}"></script>-->
-    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 
 </head>
 <body>
@@ -77,6 +76,15 @@
                 var checkCode = $(obj).val();
                 var reg = /^[0-9]{6}$/;
                 if (reg.test(checkCode)) {
+                    $(obj).parent().parent().removeClass('weui-cell_warn');
+                    return true;
+                }
+                $(obj).parent().parent().addClass('weui-cell_warn');
+                return false;
+            case 'imageCode':
+                var imageCode = $(obj).val();
+                var reg = /^[0-9]{4}$/;
+                if (reg.test(imageCode)) {
                     $(obj).parent().parent().removeClass('weui-cell_warn');
                     return true;
                 }

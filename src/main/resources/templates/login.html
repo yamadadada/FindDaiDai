@@ -30,6 +30,16 @@
                             <input onchange="verification(this, 'password')" class="weui-input" type="password" id="password" placeholder="请输入密码"/>
                         </div>
                     </div>
+                    <div class="weui-cell weui-cell_vcode">
+                        <div class="weui-cell__hd"><label class="weui-label">验证码</label></div>
+                        <div class="weui-cell__bd">
+                            <input onchange="verification(this, 'imageCode')" class="weui-input" type="number" id="imageCode" maxlength="4"/>
+                        </div>
+                        <div class="weui-cell__ft">
+                            <img id="getImageCode" class="weui-vcode-img" src="/imageCode" style="width: auto;height: auto;
+                            max-width: 120%;max-height: 120%;"/>
+                        </div>
+                    </div>
                 </div>
                 <div class="weui-cells__tips">
                     <a href="/me/toUpdatePassword">忘记密码</a>
@@ -52,7 +62,8 @@
     $(function(){
         var $studentId = $('#studentId');
         var $password = $('#password');
-        $password.on('input', function(){
+        var $imageCode = $('#imageCode');
+        $imageCode.on('input', function(){
             var $value = $password.val();
             if ($value){
                 $('#login').removeClass('weui-btn_disabled');
@@ -63,7 +74,7 @@
         $('#login').on('click', function(){
             if ($(this).hasClass('weui-btn_disabled')) return;
             // 验证表单
-            if (!verification($studentId, 'studentId') || !verification($password, 'password')) {
+            if (!verification($studentId, 'studentId') || !verification($password, 'password') || !verification($imageCode, 'imageCode')) {
                 return;
             }
             $('.page.cell').removeClass('slideIn');
@@ -75,13 +86,17 @@
                 contentType: 'application/x-www-form-urlencoded',
                 data: {
                     studentId: $studentId.val(),
-                    password: $password.val()
+                    password: $password.val(),
+                    imageCode: $imageCode.val()
                 },
                 error: function (res) {
                     $("#loadingToast").fadeOut(100);
                     $("#dialog_info").text(res.responseJSON.message);
                     $("#dialog").fadeIn(100);
                     $password.val('');
+                    $imageCode.val('');
+                    // 重新获取验证码
+                    $('#getImageCode').attr('src', server_host + "/imageCode?" + Math.random())
                 },
                 success: function () {
                     $("#loadingToast").fadeOut(100);
@@ -94,6 +109,10 @@
                 }
             });
         });
+        // 重新获取验证码
+        $('#getImageCode').on('click', function () {
+            $('#getImageCode').attr('src', server_host + "/imageCode?" + Math.random())
+        })
     });
 </script>
 
